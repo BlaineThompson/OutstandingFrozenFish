@@ -1,0 +1,70 @@
+doctype 5
+html
+  head
+    link(rel='stylesheet', href='/css/JQueryUI/css/trontastic/jquery-ui-1.10.1.custom.css')
+    link(rel='stylesheet', href='/css/style.css')
+    script(src='//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
+    script(src='/jquery-cookie-master/jquery.cookie.js')
+    script
+      $(document).ready(function(){
+       $("#_msgSubmitButton").click(function(){
+         $.ajax({
+            type:'POST',
+            data:prepMessage($("#_msgSubmit").val()),
+            url:'/updateMsg',
+            dataType:'json',
+            complete: function(chatSession){
+              var session = chatSession.responseText;
+              $("#_msgAreaText").val(session);
+              $("#_msgAreaText").scrollTop( $("#_msgAreaText")[0].scrollHeight - $("#_msgAreaText").height() );
+            }
+          });
+         $("#_msgSubmit").val("");
+       });
+      });
+
+      function prepMessage( textValue ){
+        var sendMsg = {};
+        sendMsg.text = textValue;
+        var name = "";
+        if( $.cookie('screenName') !== null || $.cookie('screenName') !== "" )
+            name = $.cookie('screenName');
+        else
+            name = 'Guest';
+        sendMsg.screen_name = name;
+        sendMsg.check = 0;
+        return sendMsg;
+      }
+
+      function _refresh(){
+       $.ajax({
+           type:'POST',
+           data:{check: 1},
+           url: '/updateMsg', 
+           dataType: 'json',
+           complete: function(refresh){
+             var session = refresh.responseText;
+             $("#_msgAreaText").val(session);
+             $("#_msgAreaText").scrollTop( $("#_msgAreaText")[0].scrollHeight - $("#_msgAreaText").height() );
+           }
+       });
+       setTimeout('_refresh()', 1000);
+      }
+  body 
+   div#_topBar
+    h4( class='ui-widget-content') OUTSTANDING FROZEN FISH
+   script
+    $(window).onload = _refresh();
+   div#_collection
+    div#_messageBody
+     h#_chatC CHAT
+     h#_chatExp !
+     div#_box( style='display : block' )
+     form#_msgArea(method='post')
+      div#_messageDisplay
+       textarea#_msgAreaText(readonly='readonly', form='#_msgArea', class='ui-state-active')
+      div#_sendDisplay
+       input#_msgSubmit(type='text', form='#_msgArea', class='ui-state-active')
+       button#_msgSubmitButton(type='submit', form='#_msgArea', class='ui-state-default') Send
+    div#_whiteBoardBody
+     iframe#_whiteBoard(src='http://starwhal.com', height='500', width='900', class='ui-state-default' )

@@ -1,0 +1,239 @@
+doctype 5
+html
+ head
+  script(src='//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
+  script(src='http://code.jquery.com/ui/1.10.1/jquery-ui.js')
+  link( rel='stylesheet', href='/css/signinStyle.css' )
+  link(rel='stylesheet', href='/css/JQueryUI/css/trontastic/jquery-ui-1.10.1.custom.css')
+  script(src='/jquery-cookie-master/jquery.cookie.js')
+  script( type='text/javascript' )
+   $(document).ready(function(){
+    $("#_signUpButtonLink").click(function(){
+      $.cookie('screenName', null, {path: '/home'});
+      $("#_signUp").dialog("open");
+    });
+   });
+
+   $(document).ready(function(){
+    $("#_submitSignInLink").click(function(){
+      $("#_signInDiv").dialog("open");
+    });
+   });
+
+   $(document).ready(function(){
+    $("#_signUpButton").click(function(){
+     var fname = $("#_firstName").val();
+
+     if( fname === null || fname === "" )
+     {
+       $('#_fNameError').dialog("open");
+       return false;
+     }
+
+     var lname = $("#_lastName").val();
+
+     if( lname === null || lname === "" )
+     {
+       $("#_lNameError").dialog("open");
+       return false;
+     }
+
+     var screenName = $("#_screenName").val();
+
+     if( screenName === "" || screenName === null )
+       $("#_screenName").val($("#_email").val());
+
+     var email = $("#_email").val();
+
+     var atpos=email.indexOf("@");
+     var dotpos=email.lastIndexOf(".");
+
+     if (atpos<1 || dotpos<atpos+2 || dotpos+2>=email.length)
+     {
+       $("#_emailError").dialog("open");
+       return false;
+     }
+
+     var pwd = $("#_pass").val();
+     var re_pwd = $("#_rePassword").val();
+     var pattern = new RegExp("[0-9]+");
+     var patternTwo = new RegExp("[A-Z]+");
+     var patternThree = new RegExp("[a-z]+");
+
+     if(pwd !== re_pwd || pwd === "" || pwd.length < 8 || !pwd.match(pattern) || !pwd.match(patternTwo) || !pwd.match(patternThree)) 
+     {
+       $("#_pwdError").dialog("open");
+       return false;
+     }
+
+     $("#_signUp").dialog("close");
+  
+     sendInfo();
+
+     $.cookie('screenName', $("#_screenName").val(), {path: '/home'});
+
+     window.location.replace('http://192.168.17.1:80/home');
+
+    });
+   });
+
+   function sendInfo(){
+      $.ajax({
+       type:'POST',
+       data: { firstname: $("#_firstName").val().toString(), lastname: $("#_lastName").val().toString(), screenName: $("#_screenName").val().toString(), e_mail: $("#_email").val().toString(), pass: $("#_pass").val().toString() },
+       url: '/newusr',
+       dataType: 'json'
+      });
+
+      // set all values in text fields to empty
+      $("#_firstName").val("");
+      $("#_lastName").val("");
+      $("#_screenName").val("");
+      $("#_email").val("");
+   }
+ 
+   $(document).ready(function(){
+    $("#_guestButton").click(function(){
+      $.cookie('screenName', null, {path: '/home'});
+      $.ajax({
+        type:'POST',
+        url:'/guestusr',
+        complete: function(number){
+         var tempName = "Guest" + number.responseText;
+         $.cookie('screenName', tempName, {path: '/home'});
+        }
+      });
+      window.location.replace('http://192.168.17.1:80/home');
+    });
+   });
+
+   
+   $(document).ready(function(){
+    $("#_submitSignIn").click(function(){
+     $.cookie('screenName', null, {path: '/home'});
+     $.ajax({
+      type:'POST',
+      data: { userEmail: $("#_mEmail").val(), pwd: $("#_mPwd").val() },
+      url: '/member',
+      dataType: 'json',
+      complete: function(success){
+         var yes = JSON.stringify(success.responseText);
+         var search = new RegExp('0');
+         if( yes.match(search) )
+         {
+            // no
+            $("#_retry").dialog("open");
+         }
+         else
+         {
+            //set cookie
+            $.cookie('screenName', success.responseText, {path: '/home'});
+            window.location.replace('http://192.168.17.1:80/home');
+         }
+      }
+     });
+    });
+   });
+   
+
+   $(document).ready(function(){
+    $("#_forgotPassword").click(function(){
+     $("#_forgotPass").dialog("open");
+     $("#_signInDiv").dialog("close");
+    });
+   });
+
+   $(document).ready(function(){
+    $("#_aboutUs").click(function(){
+     window.location.replace('http://192.168.17.1:80/aboutus');
+    });
+   });
+   
+      
+ body
+  div#_collection
+   h#_mainHeader(class='ui-state-content') OUTSTANDING FRO
+   h#_mainHeader2 ZEN FISH
+   input#_guestButton( type='button', class='ui-state-default', value='Guest')
+   button#_signUpButtonLink( type='button', class='ui-state-default' ) Sign Up
+   input#_submitSignInLink( type='button', class='ui-state-default', value='Sign In')
+   input#_aboutUs( type='button', class='ui-state-default', value='About Us')
+   hr
+   h#_madeBy created by Eric Adamski
+   br
+   h#_line(class='ui-state-content') ---------------------------------------------------------------------------------
+   br
+   h#_hello( class='ui-state-content') HELLO 
+   br
+   h#_welcome( class='ui-state-content') & WELCOME
+   //iframe#_norwhals(width="560", height="315", src="http://www.youtube.com/embed/ykwqXuMPsoc", frameborder="0", allowfullscreen)
+   form#_signUpForm(method='post')
+    div#_signUp( title='Sign Up', style='display : none' )
+     h1 SIGN UP
+     br
+     label( for='_firstName' , form='_signUpForm', class='ui-state-content' ) First Name
+     span#_fistNameStar( class='ui-icon ui-icon-star', style='display:inline-block' )
+     br
+     input#_firstName( type='text', form='_signUpForm', class='ui-state-active')
+     br
+     label( for='_lastName' , form='_signUpForm', class='ui-state-content') Last Name
+     span( class='ui-icon ui-icon-star', style='display:inline-block' )
+     br
+     input#_lastName( type='text', form='_signUpForm', class='ui-state-active')
+     br
+     label( for='_screenName', form='_signUpForm', class='ui-state-content' ) Screen Name
+     br
+     input#_screenName( type='text' , form='_signUpForm', class='ui-state-active')
+     br
+     label( for='_email' , form='_signUpForm', class='ui-state-content') Email Address
+     span( class='ui-icon ui-icon-star', style='display:inline-block' )
+     br
+     input#_email( type='text' , form='_signUpForm', class='ui-state-active')
+     br
+     label( for='_pass', form='_signUpForm' , class='ui-state-content') Password
+     span( class='ui-icon ui-icon-star', style='display:inline-block' )
+     br
+     input#_pass( type='password' , form='_signUpForm', class='ui-state-active')
+     br
+     label( for='_rePassword' , form='_signUpForm', class='ui-state-content') Re-enter Password
+     span( class='ui-icon ui-icon-star', style='display:inline-block' )
+     br
+     input#_rePassword( type='password' , form='_signUpForm', class='ui-state-active')
+     br
+     button#_signUpButton( type='button', form='_signUpForm', class='ui-state-default' ) OK
+  div#_fNameError( title='Error', style='display : none') 
+   p Please Enter First Name.
+  div#_retry( title='Incorrect Password', style=' display : none ' )
+   p Password and email pair do not match.
+  div#_lNameError( title='Error', style='display : none' )
+   p Please Enter Last Name.
+  div#_emailError( title='Error', style='display : none' )
+   p Not a valid e-mail address.
+  div#_pwdError( title='Error', style='display : none' )
+   p Password must be at least 8 characters long, and must contain one lower case letter, one upper case letter and one number.
+  div#_forgotPass( title='Password Recovery', style:'display : none' )
+   p An email has been sent to the address associated with your account.
+  script
+   $(function(){
+    $("#_fNameError").dialog({modal: true, autoOpen: false});
+    $("#_lNameError").dialog({modal: true, autoOpen: false});
+    $("#_signUp").dialog({modal: true, autoOpen: false, minHeight: 650, minWidth: 500, resizable: false, height: 650});
+    $("#_signInDiv").dialog({modal: true, autoOpen: false, minHeight: 400, minWidth: 300, resizable: false, height: 400});
+    $("#_emialError").dialog({modal: true, autoOpen: false});
+    $("#_pwdError").dialog({modal: true, autoOpen: false});
+    $("#_retry").dialog({modal: true, autoOpen: false});
+    $("#_forgotPass").dialog({modal:true, autoOpen: false});
+   });
+  div#_signInDiv( title='Sign In', style='display :none' )
+   form#_signInForm
+     h1#_signInTitle SIGN IN
+     label( for='_mEmail', form='_signInForm', class='ui-state-content') E-Mail
+     br
+     input#_mEmail( type='text', form='_signInForm', class='ui-state-active' )
+     br
+     label( for='_mPwd', form='_signInForm', class='ui-state-content') Password
+     br
+     input#_mPwd( type='password', form='_signInForm', class='ui-state-active')
+     br
+     input#_submitSignIn( type='button', form='_signInForm', class='ui-state-default', value='Sign In')
+     input#_forgotPassword( type='button', form='signInForm', class='ui-state-default', value='Forgot Password?')

@@ -1,0 +1,17 @@
+body {
+  background-color: #3a3f3f;
+  background-image: url("/images/aboutusBackground.jpg");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+}
+div#_description {
+  text-align: center;
+  color: #fff;
+  position: relative;
+  top: 400px;
+  left: 450px;
+  border: 10px solid #fff;
+  border-width: 3px;
+  width: 50%;
+}
